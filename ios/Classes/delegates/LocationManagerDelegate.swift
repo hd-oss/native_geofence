@@ -29,11 +29,19 @@ class LocationManagerDelegate: NSObject, CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didDetermineState state: CLRegionState, for region: CLRegion) {
         log.debug("didDetermineState: \(String(describing: state)) for geofence ID: \(region.identifier)")
         
-        guard let event: GeofenceEvent = switch state {
-        case .unknown: nil
-        case .inside: .enter
-        case .outside: .exit
-        } else {
+        let eventOptional: GeofenceEvent?
+        switch state {
+        case .unknown:
+            eventOptional = nil
+        case .inside:
+            eventOptional = .enter
+        case .outside:
+            eventOptional = .exit
+        @unknown default:
+            eventOptional = nil
+        }
+        
+        guard let event = eventOptional else {
             log.error("Unknown CLRegionState: \(String(describing: state))")
             return
         }
